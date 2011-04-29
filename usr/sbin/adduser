@@ -695,17 +695,35 @@ sub mktree {
     my($tree) = @_;
     my($done, @path);
     my $default_dir_mode = 0755;
+    my $lastdir;
 
     $tree =~ s:^/*(.*)/*$:$1:; # chop off leading & trailing slashes
     @path = split(/\//, $tree);
-
+    $lastdir = $path[-1];
     $done = "";
     while (@path) {
 	$done .= '/' . shift(@path);
 	-d $done || mkdir($done, $default_dir_mode) || return 0;
     }
+    return mkzfs($done,$lastdir);
+}
+
+# mkzfs: create a new zfs-filesystem 
+# parameters:
+#   path: the path
+#   dname: name of the directory
+# return values:
+#   none
+sub mkzfs {
+    my($path,$dname) = @_;
+    my $zpool = "fb/home/";
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+    $year += 1900;
+    my @zfsargs = ("/sbin/zfs","create","-o","mountpoint=$path","$zpool$dname\_$year$mon$mday$hour$min$sec");
+    system(@zfsargs);
     return 1;
 }
+
 
 # existing_user_ok: check if there's already a user present on the system which satisfies the requirements
 # parameter:
