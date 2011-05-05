@@ -721,7 +721,7 @@ sub mkzfs {
     $year += 1900;
     my @zfsargs = ("/sbin/zfs","create","-o","mountpoint=$path","$zpool$dname\_$year$mon$mday$hour$min$sec");
     system(@zfsargs);
-    return 1;
+    ($? == 0) ?	return 1 : return 0;
 }
 
 
